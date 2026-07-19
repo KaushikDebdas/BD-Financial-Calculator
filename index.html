@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BD Financial Calculator</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+
+:root{
+  /* Colors – light */
+  --bg:#ffffff;
+  --bg2:#f6f6f4;
+  --bg3:#eeede9;
+  --bg4:#e8e7e3;
+  --text:#1a1a18;
+  --text2:#56564f;
+  --text3:#9a9a93;
+  --border:rgba(0,0,0,0.10);
+  --border2:rgba(0,0,0,0.20);
+  --accent:#0f6e56;
+  --accent-light:#e1f5ee;
+  --green:#0f6e56;
+  --green-bg:#e1f5ee;
+  --amber:#854f0b;
+  --amber-bg:#faeeda;
+  --red:#a32d2d;
+  --red-bg:#fcebeb;
+  --blue:#185fa5;
+  --blue-bg:#e6f1fb;
+  /* Radii */
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:18px;
+  /* Shadows */
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  /* Spacing scale */
+  --sp-xs:6px;
+  --sp-sm:10px;
+  --sp-md:16px;
+  --sp-lg:24px;
+  --sp-xl:32px;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;
+    --bg2:#252523;
+    --bg3:#2e2e2b;
+    --bg4:#363633;
+    --text:#f0f0ec;
+    --text2:#a5a59e;
+    --text3:#67675f;
+    --border:rgba(255,255,255,0.09);
+    --border2:rgba(255,255,255,0.18);
+    --accent:#4ecba5;
+    --accent-light:#083528;
+    --green:#4ecba5;
+    --green-bg:#072e23;
+    --amber:#f0a030;
+    --amber-bg:#3a1f02;
+    --red:#f09898;
+    --red-bg:#481010;
+    --blue:#7eb5ed;
+    --blue-bg:#062448;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════ */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  color:var(--text);
+  background:var(--bg3);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════════ */
+.header{
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  padding:0 var(--sp-md);
+  height:58px;
+  position:sticky;
+  top:0;
+  z-index:200;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:var(--shadow-sm);
+}
+.header-icon{
+  width:36px;height:36px;
+  background:var(--accent);
+  border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:17px;font-weight:700;
+  flex-shrink:0;
+  user-select:none;
+}
+.header-text{min-width:0}
+.header-text h1{
+  font-size:clamp(13px,3vw,16px);
+  font-weight:700;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header-text p{
+  font-size:11px;
+  color:var(--text3);
+  margin-top:1px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONTAINER
+═══════════════════════════════════════════════════════════ */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:var(--sp-md) var(--sp-md) var(--sp-xl);
+}
+@media(min-width:600px){.container{padding:var(--sp-lg) var(--sp-lg) var(--sp-xl)}}
+@media(min-width:900px){.container{padding:var(--sp-xl) var(--sp-xl) 60px}}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS  — scrollable on mobile
+═══════════════════════════════════════════════════════════ */
+.tabs-wrap{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  margin-bottom:var(--sp-md);
+  padding:8px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{
+  display:flex;
+  gap:5px;
+  white-space:nowrap;
+  min-width:max-content;
+}
+.tab{
+  padding:8px 14px;
+  font-size:13px;
+  font-weight:500;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  background:transparent;
+  color:var(--text2);
+  cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+  font-family:inherit;
+  white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.tab:hover{background:var(--bg2);color:var(--text)}
+.tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2);font-weight:600}
+
+/* ═══════════════════════════════════════════════════════════
+   PANELS
+═══════════════════════════════════════════════════════════ */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════════════ */
+.card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:var(--sp-md);
+  box-shadow:var(--shadow-sm);
+}
+@media(min-width:600px){.card{padding:var(--sp-lg)}}
+
+.mcard{
+  background:var(--bg2);
+  border-radius:var(--r-md);
+  padding:10px 12px;
+  border:1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT GRIDS — fluid, collapse to 1 col on mobile
+═══════════════════════════════════════════════════════════ */
+.layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--sp-md);
+}
+@media(min-width:760px){
+  .layout{grid-template-columns:1fr 1fr}
+}
+@media(min-width:900px){
+  .layout.layout-40-60{grid-template-columns:2fr 3fr}
+  .layout.layout-60-40{grid-template-columns:3fr 2fr}
+}
+
+.row1{display:grid;grid-template-columns:1fr;gap:var(--sp-sm)}
+.row2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-sm)}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-sm)}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-sm)}
+
+/* On small screens collapse rows */
+@media(max-width:480px){
+  .row2,.row3,.row4{grid-template-columns:1fr}
+}
+@media(min-width:481px) and (max-width:600px){
+  .row3,.row4{grid-template-columns:1fr 1fr}
+}
+
+/* metric grids */
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.metrics3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:400px){.metrics3{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HEADING
+═══════════════════════════════════════════════════════════ */
+.sechead{
+  font-size:10.5px;
+  font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:var(--sp-sm);
+  margin-top:var(--sp-md);
+}
+.sechead:first-child{margin-top:0}
+
+/* ═══════════════════════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════════════════════ */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:var(--sp-sm)}
+.fg:last-child{margin-bottom:0}
+.fg label{
+  font-size:11.5px;
+  font-weight:600;
+  color:var(--text2);
+  user-select:none;
+}
+.fg input,
+.fg select{
+  width:100%;
+  padding:9px 12px;
+  font-size:14px;
+  font-family:inherit;
+  border:1.5px solid var(--border2);
+  border-radius:var(--r-md);
+  background:var(--bg);
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s,box-shadow .15s;
+  -webkit-appearance:none;
+  appearance:none;
+  min-height:40px; /* touch-friendly */
+}
+.fg select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  padding-right:32px;
+}
+.fg input:focus,
+.fg select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(15,110,86,.15);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   METRIC VALUE CARDS
+═══════════════════════════════════════════════════════════ */
+.mlabel{
+  font-size:10.5px;
+  font-weight:600;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-bottom:4px;
+  line-height:1.3;
+}
+.mval{
+  font-size:clamp(15px,3.5vw,20px);
+  font-weight:700;
+  color:var(--text);
+  line-height:1.2;
+  word-break:break-all;
+}
+.mval.sm{font-size:13px;font-weight:500;word-break:normal}
+.mval.green{color:var(--green)}
+.mval.amber{color:var(--amber)}
+.mval.red  {color:var(--red)}
+.mval.blue {color:var(--blue)}
+
+/* ═══════════════════════════════════════════════════════════
+   DIVIDER / NOTE / FORMULA BOX
+═══════════════════════════════════════════════════════════ */
+hr{border:none;border-top:1px solid var(--border);margin:var(--sp-md) 0}
+
+.note{
+  font-size:12px;
+  color:var(--text2);
+  background:var(--bg2);
+  border-left:3px solid var(--border2);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:8px 12px;
+  margin-top:var(--sp-sm);
+  line-height:1.55;
+}
+
+.formula-box{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.8;
+  background:var(--bg2);
+  border-radius:var(--r-md);
+  padding:10px 14px;
+  margin-top:var(--sp-sm);
+  word-break:break-word;
+  border:1px solid var(--border);
+}
+.formula-box strong{color:var(--text);font-weight:600}
+
+/* ═══════════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════════ */
+.badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  padding:3px 10px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+.badge.succ{background:var(--green-bg);color:var(--green)}
+.badge.info{background:var(--blue-bg); color:var(--blue)}
+.badge.warn{background:var(--amber-bg);color:var(--amber)}
+.badge.dang{background:var(--red-bg);  color:var(--red)}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLES  — horizontal scroll on small screens
+═══════════════════════════════════════════════════════════ */
+.tbl-wrap{
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  overflow-x:auto;   /* ← horizontal scroll on mobile */
+  max-height:320px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.tbl-wrap.tall{max-height:460px}
+.tbl-wrap.full{max-height:none}
+
+table{
+  width:100%;
+  min-width:480px;   /* prevents column crush on mobile */
+  border-collapse:collapse;
+  font-size:13px;
+}
+thead{position:sticky;top:0;z-index:2}
+th{
+  font-size:11px;
+  font-weight:700;
+  color:var(--text2);
+  text-align:left;
+  padding:8px 12px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+td{
+  padding:6px 12px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+  vertical-align:middle;
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.num{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  font-family:'SF Mono','Fira Code','Consolas',monospace;
+  font-size:12px;
+}
+
+/* maturity row highlight */
+.payout-row td{background:var(--green-bg)!important;font-weight:600;color:var(--green)!important}
+
+/* ═══════════════════════════════════════════════════════════
+   SPACING HELPERS
+═══════════════════════════════════════════════════════════ */
+.mb{margin-bottom:var(--sp-md)}
+.mt{margin-top:var(--sp-sm)}
+.gap{gap:var(--sp-md)}
+.col{display:flex;flex-direction:column;gap:var(--sp-md)}
+
+/* classification big label */
+.cl-big{font-size:clamp(18px,4vw,24px);font-weight:700;margin:4px 0 8px}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════ */
+.footer{
+  text-align:center;
+  font-size:11px;
+  color:var(--text3);
+  margin-top:var(--sp-xl);
+  padding-top:var(--sp-md);
+  border-top:1px solid var(--border);
+  line-height:1.8;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-icon">৳</div>
+  <div class="header-text">
+    <h1>BD Financial Calculator</h1>
+    <p>FDR · DPS · MIS · Loan EMI · Daily Accrual · Loan Classification</p>
+  </div>
+</header>
+
+<div class="round-settings" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 16px;font-size:13px;color:var(--text)">
+  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-weight:600">
+    <input type="checkbox" id="round-toggle" checked onchange="onRoundSettingChange()" style="width:16px;height:16px;cursor:pointer">
+    Round values
+  </label>
+  <label id="round-digits-wrap" style="display:none;align-items:center;gap:6px;white-space:nowrap">
+    Digits:
+    <select id="round-digits" onchange="onRoundSettingChange()" style="padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2" selected>2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>
+  </label>
+  <span id="round-status" style="padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2);font-weight:600;white-space:nowrap">Whole numbers</span>
+</div>
+
+<div class="container">
+
+<!-- ══ TABS ══════════════════════════════════════════════ -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab active" onclick="switchTab('fdr')">📄 FDR</button>
+    <button class="tab"        onclick="switchTab('dps')">📅 DPS</button>
+    <button class="tab"        onclick="switchTab('mis')">💸 MIS</button>
+    <button class="tab"        onclick="switchTab('emi')">🏦 Loan EMI</button>
+    <button class="tab"        onclick="switchTab('accrual')">📆 Accrual (Month)</button>
+    <button class="tab"        onclick="switchTab('accrual2')">🗓️ Accrual (Date Range)</button>
+    <button class="tab"        onclick="switchTab('classify')">🔍 Classification</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FDR / TERM DEPOSIT
+══════════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-fdr">
+  <div class="layout layout-40-60">
+
+    <!-- Left: inputs -->
+    <div class="card">
+      <div class="sechead">Deposit Details</div>
+      <div class="row2">
+        <div class="fg"><label>Principal (Tk)</label><input type="number" id="fdr-p" placeholder="e.g. 500000" min="0" inputmode="numeric" oninput="calcFDR()"></div>
+        <div class="fg"><label>Annual Rate (%)</label><input type="number" id="fdr-r" placeholder="e.g. 9" step="0.25" min="0" inputmode="decimal" oninput="calcFDR()"></div>
+      </div>
+      <div class="row3">
+        <div class="fg"><label>Tenure</label><input type="number" id="fdr-t" placeholder="e.g. 1" min="1" inputmode="numeric" oninput="calcFDR()"></div>
+        <div class="fg"><label>Unit</label>
+          <select id="fdr-unit" onchange="calcFDR()">
+            <option value="years">Years</option>
+            <option value="months">Months</option>
+            <option value="days">Days</option>
+          </select>
+        </div>
+        <div class="fg"><label>Convention</label>
+          <select id="fdr-conv" onchange="calcFDR()">
+            <option value="365">365 (NBFI)</option>
+            <option value="360">360 (Bank)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Compounding</label>
+          <select id="fdr-compound" onchange="calcFDR()">
+            <option value="0">Simple interest</option>
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+            <option value="1">Annual</option>
+          </select>
+        </div>
+        <div class="fg"><label>Interest Payout</label>
+          <select id="fdr-payout" onchange="calcFDR()">
+            <option value="0">At maturity</option>
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>TDS Rate</label>
+          <select id="fdr-tds" onchange="calcFDR()">
+            <option value="10">10% — TIN holder</option>
+            <option value="15">15% — No TIN</option>
+            <option value="0">0% — Exempt</option>
+          </select>
+        </div>
+        <div class="fg"><label>Excise Duty (Tk)</label>
+          <input type="number" id="fdr-ed" placeholder="e.g. 0" min="0" inputmode="numeric" oninput="calcFDR()">
+        </div>
+      </div>
+      <div class="note" id="fdr-ed-note"></div>
+      <hr>
+      <div class="sechead">Premature Encashment</div>
+      <div class="fg"><label>Days elapsed at encashment</label>
+        <input type="number" id="fdr-early" placeholder="e.g. 120" min="0" inputmode="numeric" oninput="calcFDR()">
+      </div>
+      <div class="row2">
+        <div class="mcard"><div class="mlabel">Rule applied</div><div class="mval sm" id="fdr-erule">—</div></div>
+        <div class="mcard"><div class="mlabel">Early payout</div><div class="mval sm green" id="fdr-epay">—</div></div>
+      </div>
+    </div>
+
+    <!-- Right: results -->
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Summary</div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Principal</div><div class="mval" id="fdr-prin">—</div></div>
+          <div class="mcard"><div class="mlabel">Tenure (days)</div><div class="mval" id="fdr-days">—</div></div>
+          <div class="mcard"><div class="mlabel">Gross interest</div><div class="mval" id="fdr-interest">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity before Tax &amp; ED</div><div class="mval blue" id="fdr-grossmat">—</div></div>
+          <div class="mcard"><div class="mlabel">TDS deducted</div><div class="mval amber" id="fdr-tds-amt">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity after Tax</div><div class="mval" id="fdr-aftertax">—</div></div>
+          <div class="mcard"><div class="mlabel">Excise Duty deducted</div><div class="mval amber" id="fdr-ed-amt">—</div></div>
+          <div class="mcard"><div class="mlabel">Net interest</div><div class="mval green" id="fdr-netint">—</div></div>
+          <div class="mcard" style="grid-column:span 2"><div class="mlabel">Net maturity (Grand Total)</div><div class="mval green" id="fdr-mat">—</div></div>
+        </div>
+        <div class="formula-box mt" id="fdr-formula"></div>
+      </div>
+      <div class="card">
+        <div class="sechead">Interest Payout Schedule</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:8px" id="fdr-payout-note"></p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Period</th><th class="num">Gross (Tk)</th><th class="num">TDS (Tk)</th><th class="num">Net payout (Tk)</th></tr></thead>
+            <tbody id="fdr-payout-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DPS
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-dps">
+  <div class="layout layout-40-60">
+
+    <div class="card">
+      <div class="sechead">DPS Details</div>
+      <div class="row2">
+        <div class="fg"><label>Installment (Tk)</label><input type="number" id="dps-p" placeholder="e.g. 5000" min="0" inputmode="numeric" oninput="calcDPS()"></div>
+        <div class="fg"><label>Annual Rate (%)</label><input type="number" id="dps-r" placeholder="e.g. 8" step="0.25" min="0" inputmode="decimal" oninput="calcDPS()"></div>
+      </div>
+      <div class="row3">
+        <div class="fg"><label>Tenure (years)</label><input type="number" id="dps-t" placeholder="e.g. 5" min="1" max="10" inputmode="numeric" oninput="calcDPS()"></div>
+        <div class="fg"><label>Installment Freq</label>
+          <select id="dps-freq" onchange="calcDPS()">
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+          </select>
+        </div>
+        <div class="fg"><label>Compounding</label>
+          <select id="dps-compound" onchange="calcDPS()">
+            <option value="same">Same as freq</option>
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+            <option value="1">Annual</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>TDS Rate</label>
+          <select id="dps-tds" onchange="calcDPS()">
+            <option value="10">10% (TIN)</option>
+            <option value="15">15% (No TIN)</option>
+            <option value="0">0% exempt</option>
+          </select>
+        </div>
+        <div class="fg"><label>Excise Duty (Tk)</label>
+          <input type="number" id="dps-ed" placeholder="e.g. 0" min="0" inputmode="numeric" oninput="calcDPS()">
+        </div>
+      </div>
+      <div class="note" id="dps-ed-note" style="margin-top:-2px"></div>
+      <hr>
+      <div class="sechead">Missed Installments</div>
+      <div class="fg"><label>Number missed</label><input type="number" id="dps-miss" placeholder="e.g. 0" min="0" inputmode="numeric" oninput="calcDPS()"></div>
+      <div class="mcard"><div class="mlabel">Status</div><div class="mval sm" id="dps-miss-msg">—</div></div>
+      <div class="note">Formula: Future Value of Annuity Due. Each installment earns compound interest from deposit date to maturity.</div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Summary</div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Total deposited</div><div class="mval" id="dps-total">—</div></div>
+          <div class="mcard"><div class="mlabel">Installments</div><div class="mval" id="dps-count">—</div></div>
+          <div class="mcard"><div class="mlabel">Gross interest</div><div class="mval" id="dps-interest">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity before Tax &amp; ED</div><div class="mval blue" id="dps-grossmat">—</div></div>
+          <div class="mcard"><div class="mlabel">TDS amount</div><div class="mval amber" id="dps-tds-amt">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity after Tax</div><div class="mval" id="dps-aftertax">—</div></div>
+          <div class="mcard"><div class="mlabel">Excise Duty deducted</div><div class="mval amber" id="dps-ed-amt">—</div></div>
+          <div class="mcard"><div class="mlabel">Eff. annual yield</div><div class="mval green" id="dps-ear">—</div></div>
+          <div class="mcard" style="grid-column:span 2"><div class="mlabel">Net maturity (Grand Total)</div><div class="mval green" id="dps-mat">—</div></div>
+        </div>
+        <div class="formula-box mt" id="dps-formula"></div>
+      </div>
+      <div class="card">
+        <div class="sechead">Period-by-Period Breakdown</div>
+        <div class="tbl-wrap tall">
+          <table>
+            <thead><tr><th>Period</th><th class="num">Installment (Tk)</th><th class="num">Cumul. deposited</th><th class="num">Cumul. value</th><th class="num">Interest earned</th></tr></thead>
+            <tbody id="dps-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MIS
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-mis">
+  <div class="layout layout-40-60">
+
+    <div class="card">
+      <div class="sechead">MIS Details</div>
+      <div class="row2">
+        <div class="fg"><label>Principal (Tk)</label><input type="number" id="mis-p" placeholder="e.g. 1000000" min="0" inputmode="numeric" oninput="calcMIS()"></div>
+        <div class="fg"><label>Annual Rate (%)</label><input type="number" id="mis-r" placeholder="e.g. 10" step="0.25" min="0" inputmode="decimal" oninput="calcMIS()"></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Tenure (years)</label><input type="number" id="mis-t" placeholder="e.g. 3" min="1" inputmode="numeric" oninput="calcMIS()"></div>
+        <div class="fg"><label>Payout Freq</label>
+          <select id="mis-freq" onchange="calcMIS()">
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>TDS Rate</label>
+          <select id="mis-tds" onchange="calcMIS()">
+            <option value="10">10% (TIN)</option>
+            <option value="15">15% (No TIN)</option>
+            <option value="0">0%</option>
+          </select>
+        </div>
+        <div class="fg"><label>Excise Duty (Tk)</label>
+          <input type="number" id="mis-ed" placeholder="e.g. 0" min="0" inputmode="numeric" oninput="calcMIS()">
+        </div>
+      </div>
+      <div class="note" id="mis-ed-note" style="margin-top:-2px"></div>
+      <div class="note">Principal returned in full at maturity. Interest paid at selected frequency. Formula: Payout = (P × R) ÷ frequency</div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Payout Summary</div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Gross per period</div><div class="mval" id="mis-gross">—</div></div>
+          <div class="mcard"><div class="mlabel">TDS per period</div><div class="mval amber" id="mis-tds-amt">—</div></div>
+          <div class="mcard"><div class="mlabel">Net per period</div><div class="mval green" id="mis-net">—</div></div>
+          <div class="mcard"><div class="mlabel">Net annual income</div><div class="mval green" id="mis-annual">—</div></div>
+          <div class="mcard"><div class="mlabel">Total income (whole tenure)</div><div class="mval green" id="mis-total">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity before Tax &amp; ED</div><div class="mval blue" id="mis-grossmat">—</div></div>
+          <div class="mcard"><div class="mlabel">Maturity after Tax</div><div class="mval" id="mis-aftertax">—</div></div>
+          <div class="mcard"><div class="mlabel">Excise Duty deducted</div><div class="mval amber" id="mis-ed-amt">—</div></div>
+          <div class="mcard" style="grid-column:span 2"><div class="mlabel">Principal returned at maturity (Grand Total)</div><div class="mval blue" id="mis-prin">—</div></div>
+        </div>
+        <div class="formula-box mt" id="mis-formula"></div>
+      </div>
+      <div class="card">
+        <div class="sechead">Full Payout Schedule</div>
+        <div class="tbl-wrap tall">
+          <table>
+            <thead><tr><th>Period</th><th class="num">Gross (Tk)</th><th class="num">TDS (Tk)</th><th class="num">Net (Tk)</th><th class="num">Cumul. net (Tk)</th></tr></thead>
+            <tbody id="mis-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOAN EMI
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-emi">
+  <div class="layout mb">
+    <div class="card">
+      <div class="sechead">Loan Details</div>
+      <div class="row2">
+        <div class="fg"><label>Loan Amount (Tk)</label><input type="number" id="emi-p" placeholder="e.g. 2000000" min="0" inputmode="numeric" oninput="calcEMI()"></div>
+        <div class="fg"><label>Annual Rate (%)</label><input type="number" id="emi-r" placeholder="e.g. 12" step="0.25" min="0" inputmode="decimal" oninput="calcEMI()"></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Tenure (years)</label><input type="number" id="emi-t" placeholder="e.g. 5" min="1" inputmode="numeric" oninput="calcEMI()"></div>
+        <div class="fg"><label>Repayment Freq</label>
+          <select id="emi-freq" onchange="calcEMI()">
+            <option value="12">Monthly</option>
+            <option value="4">Quarterly</option>
+            <option value="2">Half-yearly</option>
+            <option value="1">Annual</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Schedule rows</label>
+        <select id="emi-rows" onchange="calcEMI()">
+          <option value="12">First 12 periods</option>
+          <option value="24">First 24 periods</option>
+          <option value="60">First 60 periods</option>
+          <option value="all">All periods</option>
+        </select>
+      </div>
+      <div class="note" id="emi-formula-note"></div>
+    </div>
+    <div class="card">
+      <div class="sechead">Summary</div>
+      <div class="metrics">
+        <div class="mcard"><div class="mlabel" id="emi-freq-label">Installment</div><div class="mval green" id="emi-val">—</div></div>
+        <div class="mcard"><div class="mlabel">Total periods</div><div class="mval" id="emi-periods">—</div></div>
+        <div class="mcard"><div class="mlabel">Total payment</div><div class="mval" id="emi-total">—</div></div>
+        <div class="mcard"><div class="mlabel">Total principal</div><div class="mval blue" id="emi-prin">—</div></div>
+        <div class="mcard"><div class="mlabel">Total interest</div><div class="mval amber" id="emi-intamt">—</div></div>
+        <div class="mcard"><div class="mlabel">Interest %</div><div class="mval amber" id="emi-intpct">—</div></div>
+        <div class="mcard"><div class="mlabel">Rate per period</div><div class="mval" id="emi-mrate">—</div></div>
+        <div class="mcard"><div class="mlabel">Eff. annual rate</div><div class="mval" id="emi-ear">—</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sechead">Amortization Schedule</div>
+    <div class="tbl-wrap tall">
+      <table>
+        <thead>
+          <tr>
+            <th id="emi-col-period">Period</th>
+            <th class="num">Opening bal (Tk)</th>
+            <th class="num">Interest (Tk)</th>
+            <th class="num">Principal (Tk)</th>
+            <th class="num" id="emi-col-emi">EMI (Tk)</th>
+            <th class="num">Closing bal (Tk)</th>
+          </tr>
+        </thead>
+        <tbody id="emi-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DAILY ACCRUAL
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-accrual">
+  <div class="layout mb">
+    <div class="card">
+      <div class="sechead">Accrual Inputs</div>
+      <div class="row2">
+        <div class="fg"><label>Outstanding Balance (Tk)</label><input type="number" id="acc-bal" placeholder="e.g. 1000000" min="0" inputmode="numeric" oninput="calcAccrual()"></div>
+        <div class="fg"><label>Annual Rate (%)</label><input type="number" id="acc-r" placeholder="e.g. 12" step="0.25" min="0" inputmode="decimal" oninput="calcAccrual()"></div>
+      </div>
+      <div class="row3">
+        <div class="fg"><label>Month</label>
+          <select id="acc-month" onchange="calcAccrual()">
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="fg"><label>Year</label><input type="number" id="acc-year" placeholder="e.g. 2025" min="2000" max="2100" inputmode="numeric" oninput="calcAccrual()"></div>
+        <div class="fg"><label>Convention</label>
+          <select id="acc-conv" onchange="calcAccrual()">
+            <option value="365">365 (NBFI)</option>
+            <option value="360">360 (Bank)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Loan Classification</label>
+        <select id="acc-class" onchange="calcAccrual()">
+          <option value="uc">UC — Unclassified</option>
+          <option value="sma">SMA — Special Mention</option>
+          <option value="ss">SS — Sub-Standard</option>
+          <option value="df">DF — Doubtful</option>
+          <option value="bl">BL — Bad / Loss</option>
+        </select>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Accrual at Every Frequency</div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Daily</div><div class="mval" id="acc-daily">—</div></div>
+          <div class="mcard"><div class="mlabel">Days in month</div><div class="mval" id="acc-days">—</div></div>
+          <div class="mcard"><div class="mlabel">Monthly</div><div class="mval" id="acc-monthly">—</div></div>
+          <div class="mcard"><div class="mlabel">Quarterly</div><div class="mval sm" id="acc-quarterly">—</div></div>
+          <div class="mcard"><div class="mlabel">Half-yearly</div><div class="mval sm" id="acc-halfyearly">—</div></div>
+          <div class="mcard"><div class="mlabel">Annual</div><div class="mval sm" id="acc-annual">—</div></div>
+        </div>
+        <div class="mcard mt"><div class="mlabel">Booked to</div><div class="mval sm" id="acc-dest">—</div></div>
+      </div>
+      <div class="card">
+        <div class="sechead">Bangladesh Bank Rule</div>
+        <div id="acc-rule-text" style="font-size:13px;color:var(--text2);line-height:1.6"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sechead">Day-by-Day Breakdown</div>
+    <div class="tbl-wrap tall">
+      <table>
+        <thead><tr><th>Day</th><th class="num">Balance (Tk)</th><th class="num">Daily interest (Tk)</th><th class="num">Cumulative (Tk)</th></tr></thead>
+        <tbody id="acc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DATE-RANGE ACCRUAL (month-end accrual booking between two dates)
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-accrual2">
+  <div class="layout mb">
+    <div class="card">
+      <div class="sechead">Purpose</div>
+      <div class="fg"><label>Calculating accrual for</label>
+        <select id="acc2-purpose" onchange="toggleAccrual2Purpose();calcAccrualDates();">
+          <option value="deposit">Deposit (FDR / DPS / MIS)</option>
+          <option value="loan">Loan</option>
+        </select>
+      </div>
+      <div class="sechead">Period</div>
+      <div class="row2">
+        <div class="fg"><label>Start Date</label><input type="date" id="acc2-start" oninput="calcAccrualDates()"></div>
+        <div class="fg"><label>End Date</label><input type="date" id="acc2-end" oninput="calcAccrualDates()"></div>
+      </div>
+      <div class="mcard"><div class="mlabel">Total days in period</div><div class="mval" id="acc2-totaldays">—</div></div>
+      <div class="fg mt" id="acc2-duedate-wrap" style="display:none">
+        <label>Installment Due Date (for booking rows only)</label>
+        <input type="date" id="acc2-duedate" oninput="calcAccrualDates()">
+      </div>
+      <div class="note" id="acc2-loan-note" style="display:none">This only marks the recurring day-of-month your installment is due, so the table can show separate Month-End and Due Date booking rows. It does <strong>not</strong> assume the loan is unpaid — actual overdue status is set below.</div>
+      <div class="fg mt" id="acc2-overdue-mode-wrap" style="display:none">
+        <label>Specify overdue status by</label>
+        <select id="acc2-overdue-mode" onchange="toggleOverdueMode();calcAccrualDates();">
+          <option value="days">Days overdue (as of End Date)</option>
+          <option value="count">Number of installments missed</option>
+        </select>
+      </div>
+      <div class="row2 mt" id="acc2-overdue-wrap" style="display:none">
+        <div class="fg"><label>Currently Overdue (days, as of End Date)</label><input type="number" id="acc2-overduedays" placeholder="e.g. 0" min="0" inputmode="numeric" oninput="calcAccrualDates()"></div>
+        <div class="mcard"><div class="mlabel">Effective missed-since date</div><div class="mval sm" id="acc2-effdate">—</div></div>
+      </div>
+      <div class="row2 mt" id="acc2-overduecount-wrap" style="display:none">
+        <div class="fg"><label>Installments Missed (count)</label><input type="number" id="acc2-overduecount" placeholder="e.g. 2" min="0" inputmode="numeric" oninput="calcAccrualDates()"></div>
+        <div class="mcard"><div class="mlabel">Effective missed-since date</div><div class="mval sm" id="acc2-effdate-count">—</div></div>
+      </div>
+      <div class="note" id="acc2-overdue-note" style="display:none">Leave as 0 if the loan is fully current (fully paid, no missed installments) — the whole period will then be recognized as Income throughout, regardless of the Due Date. With "Number of installments missed", the tool counts back that many recurring Due Dates (using the day-of-month above) to work out the effective missed-since date and resulting days overdue automatically.</div>
+      <hr>
+      <div class="sechead">Accrual Inputs</div>
+      <div class="fg"><label>Outstanding Balance (Tk)</label><input type="number" id="acc2-bal" placeholder="e.g. 1000000" min="0" inputmode="numeric" oninput="calcAccrualDates()"></div>
+      <div class="row2">
+        <div class="fg"><label>Annual Interest Rate (%)</label><input type="number" id="acc2-r" placeholder="e.g. 12" step="0.25" min="0" inputmode="decimal" oninput="calcAccrualDates()"></div>
+        <div class="fg"><label>Convention</label>
+          <select id="acc2-conv" onchange="calcAccrualDates()">
+            <option value="365">365 (NBFI)</option>
+            <option value="360">360 (Bank)</option>
+          </select>
+        </div>
+      </div>
+      <div class="note">Accrual is booked at each month-end and again at maturity/closing (the end date), even if that falls mid-month. Day count: start date is counted, end date is not (the balance is no longer outstanding on that day).</div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Summary</div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Daily interest</div><div class="mval" id="acc2-daily">—</div></div>
+          <div class="mcard"><div class="mlabel">Total days</div><div class="mval" id="acc2-days">—</div></div>
+          <div class="mcard"><div class="mlabel" id="acc2-months-label">Months touched</div><div class="mval" id="acc2-months">—</div></div>
+          <div class="mcard"><div class="mlabel">Total interest (gross)</div><div class="mval" id="acc2-total">—</div></div>
+        </div>
+        <div class="metrics mt" id="acc2-loan-summary" style="display:none">
+          <div class="mcard"><div class="mlabel">Classification at End Date</div><div class="mval sm" id="acc2-status">—</div></div>
+          <div class="mcard"><div class="mlabel">Overdue at End Date</div><div class="mval sm" id="acc2-overdue">—</div></div>
+          <div class="mcard"><div class="mlabel">Recognized as Income</div><div class="mval sm green" id="acc2-recognized">—</div></div>
+          <div class="mcard"><div class="mlabel">Interest Suspense</div><div class="mval sm amber" id="acc2-suspense">—</div></div>
+        </div>
+        <div class="formula-box mt" id="acc2-formula"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sechead">Month-by-Month Accrual Breakdown</div>
+    <div class="tbl-wrap tall">
+      <table>
+        <thead>
+          <tr id="acc2-thead-row">
+            <th>Month</th><th>From</th><th>To</th><th class="num">Days</th>
+            <th class="num">Interest (Tk)</th><th class="num">Cumulative (Tk)</th><th>Booking</th>
+          </tr>
+        </thead>
+        <tbody id="acc2-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOAN CLASSIFICATION
+══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-classify">
+  <div class="card mb">
+    <div class="sechead">Classification Policy (editable — match your organization's actual rules)</div>
+    <div class="note">Defaults below follow Bangladesh Bank BRPD Circular No. 15 (2024). If your organization uses different overdue cutoffs, provisioning %, or books income/suspense differently, change them here — this Classification tab and the Loan Accrual (Date Range) tab both read these same settings, so they can never silently disagree with each other.</div>
+    <div class="row3 mt">
+      <div class="fg"><label>SMA cutoff (months overdue)</label><input type="number" id="clp-sma" value="3" min="1" oninput="onPolicyChange()"></div>
+      <div class="fg"><label>SS cutoff (months overdue)</label><input type="number" id="clp-ss" value="12" min="1" oninput="onPolicyChange()"></div>
+      <div class="fg"><label>DF cutoff (months overdue)</label><input type="number" id="clp-df" value="36" min="1" oninput="onPolicyChange()"></div>
+    </div>
+    <div class="note" style="margin-top:8px">Ranges: UC = 0 months · SMA = 1 to SMA-cutoff · SS = (SMA-cutoff+1) to SS-cutoff · DF = (SS-cutoff+1) to DF-cutoff · BL = beyond DF-cutoff.</div>
+    <div class="tbl-wrap full mt">
+      <table>
+        <thead><tr><th>Class</th><th class="num">Provision %</th><th>Interest Treatment</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge succ">UC</span></td>
+            <td class="num"><input type="number" id="clp-prov-uc" value="1" min="0" max="100" step="0.5" style="width:70px;text-align:right" oninput="onPolicyChange()"></td>
+            <td><select id="clp-treat-uc" onchange="onPolicyChange()">
+              <option value="income" selected>Income Account</option><option value="suspense">Interest Suspense</option><option value="stopped">Accrual Stopped</option>
+            </select></td></tr>
+          <tr><td><span class="badge info">SMA</span></td>
+            <td class="num"><input type="number" id="clp-prov-sma" value="5" min="0" max="100" step="0.5" style="width:70px;text-align:right" oninput="onPolicyChange()"></td>
+            <td><select id="clp-treat-sma" onchange="onPolicyChange()">
+              <option value="income" selected>Income Account</option><option value="suspense">Interest Suspense</option><option value="stopped">Accrual Stopped</option>
+            </select></td></tr>
+          <tr><td><span class="badge warn">SS</span></td>
+            <td class="num"><input type="number" id="clp-prov-ss" value="20" min="0" max="100" step="0.5" style="width:70px;text-align:right" oninput="onPolicyChange()"></td>
+            <td><select id="clp-treat-ss" onchange="onPolicyChange()">
+              <option value="income">Income Account</option><option value="suspense" selected>Interest Suspense</option><option value="stopped">Accrual Stopped</option>
+            </select></td></tr>
+          <tr><td><span class="badge warn">DF</span></td>
+            <td class="num"><input type="number" id="clp-prov-df" value="50" min="0" max="100" step="0.5" style="width:70px;text-align:right" oninput="onPolicyChange()"></td>
+            <td><select id="clp-treat-df" onchange="onPolicyChange()">
+              <option value="income">Income Account</option><option value="suspense" selected>Interest Suspense</option><option value="stopped">Accrual Stopped</option>
+            </select></td></tr>
+          <tr><td><span class="badge dang">BL</span></td>
+            <td class="num"><input type="number" id="clp-prov-bl" value="100" min="0" max="100" step="0.5" style="width:70px;text-align:right" oninput="onPolicyChange()"></td>
+            <td><select id="clp-treat-bl" onchange="onPolicyChange()">
+              <option value="income">Income Account</option><option value="suspense">Interest Suspense</option><option value="stopped" selected>Accrual Stopped</option>
+            </select></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="layout mb">
+    <div class="card">
+      <div class="sechead">Loan Details</div>
+      <div class="fg"><label>Loan Type</label>
+        <select id="cl-type" onchange="calcClassify()">
+          <option value="term">Fixed Term Loan</option>
+          <option value="cont">Continuous Loan</option>
+          <option value="demand">Demand Loan</option>
+        </select>
+      </div>
+      <div class="note">Overdue-month thresholds follow the Classification Policy card above, applied uniformly across loan types. Loan type is kept for documentation/reference — it does not change the threshold in this version.</div>
+      <div class="row2">
+        <div class="fg"><label>Overdue (months)</label><input type="number" id="cl-months" placeholder="e.g. 4" min="0" inputmode="numeric" oninput="calcClassify()"></div>
+        <div class="fg"><label>Outstanding (Tk)</label><input type="number" id="cl-bal" placeholder="e.g. 1000000" min="0" inputmode="numeric" oninput="calcClassify()"></div>
+      </div>
+      <hr>
+      <div class="sechead">Rescheduling</div>
+      <div class="fg"><label>Rescheduling attempt</label>
+        <select id="cl-resch" onchange="calcClassify()">
+          <option value="0">Not rescheduled</option>
+          <option value="1">1st rescheduling</option>
+          <option value="2">2nd rescheduling</option>
+          <option value="3">3rd rescheduling</option>
+        </select>
+      </div>
+      <div id="cl-resch-box"></div>
+      <div class="note">BB limits rescheduling to 3 times. Missing 6 months or 2 quarterly installments post-rescheduling → Bad/Loss immediately.</div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="sechead">Classification Result</div>
+        <div class="cl-big" id="cl-label">—</div>
+        <div id="cl-badge-wrap" style="margin-bottom:12px"></div>
+        <div class="metrics">
+          <div class="mcard"><div class="mlabel">Provision rate</div><div class="mval red" id="cl-prov-pct">—</div></div>
+          <div class="mcard"><div class="mlabel">Provision amount</div><div class="mval red" id="cl-prov-amt">—</div></div>
+          <div class="mcard" style="grid-column:span 2"><div class="mlabel">Interest treatment</div><div class="mval sm" id="cl-int-treat">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sechead">Reference (Bangladesh Bank default cutoffs — see editable policy above for what's actually applied)</div>
+    <div class="tbl-wrap full">
+      <table>
+        <thead><tr><th>Status</th><th>Code</th><th>Overdue</th><th>Provision</th><th>Interest treatment</th><th>Reschedule (1st/2nd/3rd)</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge succ">Unclassified</span></td><td><strong>UC</strong></td><td>Current</td><td class="num">1–2%</td><td>→ Income account</td><td>Not allowed</td></tr>
+          <tr><td><span class="badge info">Special Mention</span></td><td><strong>SMA</strong></td><td>1–3 months</td><td class="num">5%</td><td>→ Income account</td><td>Not allowed</td></tr>
+          <tr><td><span class="badge warn">Sub-Standard</span></td><td><strong>SS</strong></td><td>3–12 months</td><td class="num">20%</td><td>→ Interest Suspense</td><td>48 / 36 / 24 months</td></tr>
+          <tr><td><span class="badge warn">Doubtful</span></td><td><strong>DF</strong></td><td>12–36 months</td><td class="num">50%</td><td>→ Interest Suspense</td><td>36 / 24 / 18 months</td></tr>
+          <tr><td><span class="badge dang">Bad / Loss</span></td><td><strong>BL</strong></td><td>36+ months</td><td class="num">100%</td><td>→ Stop charging</td><td>36 / 24 / 18 months</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="margin-top:10px">Source: BB BRPD Circular No. 15 (Nov 2024) &amp; DFIM circulars. Finance Company Act 2023.</div>
+  </div>
+</div>
+
+<div class="footer">
+  BD Financial Calculator &nbsp;·&nbsp; BB BRPD &amp; DFIM Circulars &nbsp;·&nbsp; Finance Company Act 2023<br>
+  Day convention: 365 days (NBFI) | 360 days (some banks) &nbsp;·&nbsp; TDS: 10% (TIN holder) / 15% (No TIN)
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+/* Global rounding preference: when roundEnabled is true, values are
+   shown as whole numbers (original behaviour). When false, values are
+   shown with the number of decimal digits chosen in roundDigits. */
+var roundEnabled = true;
+var roundDigits  = 2;
+
+function fmt(n){
+  if(roundEnabled) return Math.round(n).toLocaleString('en-BD');
+  return (+n).toLocaleString('en-BD',{minimumFractionDigits:roundDigits,maximumFractionDigits:roundDigits});
+}
+function fmt2(n){
+  var d = roundEnabled ? 2 : roundDigits;
+  return (+n).toLocaleString('en-BD',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function tk(n)   { return 'Tk '+fmt(n); }
+function tk2(n)  { return 'Tk '+fmt2(n); }
+
+function onRoundSettingChange(){
+  var chk = document.getElementById('round-toggle');
+  var wrap = document.getElementById('round-digits-wrap');
+  var status = document.getElementById('round-status');
+  roundEnabled = chk.checked;
+  wrap.style.display = roundEnabled ? 'none' : 'flex';
+  roundDigits = +document.getElementById('round-digits').value;
+  status.textContent = roundEnabled ? 'Whole numbers' : roundDigits+' decimal place'+(roundDigits===1?'':'s');
+  recalcAll();
+}
+
+function recalcAll(){
+  try{ calcFDR(); }catch(e){}
+  try{ calcDPS(); }catch(e){}
+  try{ calcMIS(); }catch(e){}
+  try{ calcEMI(); }catch(e){}
+  try{ calcAccrual(); }catch(e){}
+  try{ calcAccrualDates(); }catch(e){}
+  try{ calcClassify(); }catch(e){}
+}
+function dimb(m,y){ return new Date(y,m,0).getDate(); }
+function daysInWindow(startMonth,startYear,numMonths){
+  var total=0, m=startMonth, y=startYear;
+  for(var i=0;i<numMonths;i++){
+    total+=dimb(m,y);
+    m++; if(m>12){ m=1; y++; }
+  }
+  return total;
+}
+
+/* Excise Duty slabs — Bangladesh, effective 01-07-2025.
+   Charged once (at maturity/closing or yearly), based on the balance
+   held. This is a REFERENCE lookup only — the actual ED figure is
+   entered manually in each product tab, matching how the source
+   deposit-calculation sheet works (ED isn't auto-derived there either,
+   since branches sometimes apply a different/negotiated figure). */
+var EXCISE_SLABS = [
+  [300000,      0],
+  [500000,    150],
+  [1000000,   500],
+  [5000000,  3000],
+  [10000000, 5000],
+  [20000000,10000],
+  [50000000,20000],
+  [Infinity,50000]
+];
+function exciseDutyForBalance(bal){
+  for(var i=0;i<EXCISE_SLABS.length;i++){
+    if(bal<=EXCISE_SLABS[i][0]) return EXCISE_SLABS[i][1];
+  }
+  return EXCISE_SLABS[EXCISE_SLABS.length-1][1];
+}
+
+function freqName(f){
+  var v=+f;
+  if(v===12) return 'Monthly';
+  if(v===4)  return 'Quarterly';
+  if(v===2)  return 'Half-yearly';
+  if(v===1)  return 'Annual';
+  return 'Period';
+}
+
+function periodLabel(freq,i){
+  var f=+freq;
+  if(f===12){ var yr=Math.ceil(i/12); var mo=((i-1)%12)+1; return 'Y'+yr+' M'+mo; }
+  if(f===4) { var yr=Math.ceil(i/4);  var q=((i-1)%4)+1;   return 'Y'+yr+' Q'+q; }
+  if(f===2) { var yr=Math.ceil(i/2);  var h=((i-1)%2)+1;   return 'Y'+yr+' H'+h; }
+  return 'Year '+i;
+}
+
+function switchTab(id){
+  var ids=['fdr','dps','mis','emi','accrual','accrual2','classify'];
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',ids[i]===id);});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ════════════════════════════════════════
+   FDR
+════════════════════════════════════════ */
+function calcFDR(){
+  var P       = +document.getElementById('fdr-p').value        ||0;
+  var R       = +document.getElementById('fdr-r').value/100    ||0;
+  var T       = +document.getElementById('fdr-t').value        ||0;
+  var unit    =  document.getElementById('fdr-unit').value;
+  var conv    = +document.getElementById('fdr-conv').value;
+  var cmpFreq = +document.getElementById('fdr-compound').value;
+  var payFreq = +document.getElementById('fdr-payout').value;
+  var tdsR    = +document.getElementById('fdr-tds').value/100;
+  var earlyD  = +document.getElementById('fdr-early').value    ||0;
+  var ed      = +document.getElementById('fdr-ed').value       ||0;
+
+  /* Fix: tenure→days conversion now uses the SAME convention (365/360)
+     the user picked, instead of always hardcoding 365. */
+  var totalDays = unit==='years' ? T*conv : unit==='months' ? T*conv/12 : T;
+  var years     = totalDays/conv;
+
+  var interest, grossMat;
+  if(cmpFreq===0){
+    interest = P*R*years;
+    grossMat = P+interest;
+  } else {
+    grossMat = P*Math.pow(1+R/cmpFreq, cmpFreq*years);
+    interest = grossMat-P;
+  }
+  var tdsAmt      = interest*tdsR;
+  var matAfterTax = grossMat-tdsAmt;      // Maturity After Tax (before ED)
+  var netInt      = interest-tdsAmt-ed;   // Net Interest = Interest − Tax − ED
+
+  /* Net maturity (Grand Total):
+     - Lump-sum payout: principal + interest, minus tax and ED.
+     - Periodic payout: interest was already disbursed net-of-tax each
+       period, so only the principal comes back at closing, minus the
+       one-time Excise Duty deducted at closing. */
+  var netMat = payFreq===0 ? (matAfterTax-ed) : (P-ed);
+
+  document.getElementById('fdr-prin').textContent     = tk(P);
+  document.getElementById('fdr-days').textContent     = Math.round(totalDays)+' days';
+  document.getElementById('fdr-interest').textContent = tk(interest);
+  document.getElementById('fdr-grossmat').textContent = tk(grossMat);
+  document.getElementById('fdr-tds-amt').textContent  = tk(tdsAmt);
+  document.getElementById('fdr-aftertax').textContent = tk(matAfterTax);
+  document.getElementById('fdr-ed-amt').textContent   = tk(ed);
+  document.getElementById('fdr-netint').textContent   = tk(netInt);
+  document.getElementById('fdr-mat').textContent      = tk(netMat);
+
+  var suggestedED = exciseDutyForBalance(grossMat);
+  document.getElementById('fdr-ed-note').innerHTML =
+    'Excise duty is a manual, one-time slab-based charge (deducted only at maturity/closing) — it is not auto-calculated from the balance. '
+    +'Slab reference for a closing balance of '+tk(grossMat)+': <strong>'+tk(suggestedED)+'</strong> '
+    +'<a href="#" onclick="document.getElementById(\'fdr-ed\').value='+suggestedED+';calcFDR();return false;" style="color:var(--accent)">Use this</a>';
+
+  var fbox = document.getElementById('fdr-formula');
+  var html;
+  if(cmpFreq===0){
+    html='<strong>Simple Interest:</strong> I = P × R × (Days ÷ '+conv+')<br>'
+      +'= '+fmt(P)+' × '+(R*100).toFixed(2)+'% × ('+Math.round(totalDays)+'÷'+conv+') = <strong>'+tk2(interest)+'</strong><br>';
+  } else {
+    var cName=freqName(cmpFreq).toLowerCase();
+    html='<strong>Compound ('+cName+'):</strong> M = P × (1 + R/'+cmpFreq+')^('+cmpFreq+'×'+years.toFixed(4)+')<br>'
+      +'= '+fmt(P)+' × (1 + '+(R/cmpFreq*100).toFixed(4)+'%)^'+(cmpFreq*years).toFixed(2)+' = <strong>'+tk2(grossMat)+'</strong><br>';
+  }
+  html+='Maturity before Tax &amp; ED = P + I = <strong>'+tk2(grossMat)+'</strong><br>'
+    +'Tax = I × '+(tdsR*100).toFixed(0)+'% = '+tk2(tdsAmt)+' · Maturity after Tax = <strong>'+tk2(matAfterTax)+'</strong><br>'
+    +'Net Interest = I − Tax − ED = '+tk2(interest)+' − '+tk2(tdsAmt)+' − '+tk2(ed)+' = <strong>'+tk2(netInt)+'</strong><br>'
+    +'Grand Total (Net Maturity) = '+(payFreq===0?'Maturity after Tax − ED':'Principal − ED (interest already paid out periodically)')+' = <strong>'+tk(netMat)+'</strong>';
+  fbox.innerHTML=html;
+
+  var tbody = document.getElementById('fdr-payout-tbody');
+  tbody.innerHTML='';
+  var noteEl = document.getElementById('fdr-payout-note');
+  if(payFreq===0){
+    noteEl.textContent='Payout: lump sum at maturity.';
+    var tr=document.createElement('tr');
+    tr.className='payout-row';
+    tr.innerHTML='<td>Maturity</td><td class="num">'+fmt2(interest)+'</td><td class="num">'+fmt2(tdsAmt)+'</td><td class="num">'+fmt2(netInt+ed)+'</td>';
+    tbody.appendChild(tr);
+  } else {
+    noteEl.textContent=freqName(payFreq)+' interest payout (simple, non-compounding — a payout each period cannot itself compound). Principal returned at maturity, less Excise Duty.';
+    var totalPeriods = Math.round(years * payFreq);
+    /* Note: periodic payout is always simple interest per period, regardless
+       of the Compounding selector — compounding only applies when interest
+       accumulates untouched until maturity. */
+    var grossPerPeriod = P*R/payFreq;
+    var tdsPerPeriod = grossPerPeriod*tdsR;
+    var netPerPeriod = grossPerPeriod-tdsPerPeriod;
+    for(var i=1;i<=totalPeriods;i++){
+      var tr=document.createElement('tr');
+      var isLast=(i===totalPeriods);
+      if(isLast) tr.className='payout-row';
+      tr.innerHTML='<td>'+periodLabel(payFreq,i)+(isLast?' ✦ Maturity':'')+'</td>'
+        +'<td class="num">'+fmt2(grossPerPeriod)+'</td>'
+        +'<td class="num">'+fmt2(tdsPerPeriod)+'</td>'
+        +'<td class="num">'+fmt2(netPerPeriod)+(isLast?' + Principal '+tk(P)+' − ED '+tk(ed):'')+'</td>';
+      tbody.appendChild(tr);
+    }
+  }
+
+  var rule, earlyPay;
+  if(earlyD<=90){
+    rule='No benefit — encashment within 3 months';
+    earlyPay=P;
+  } else {
+    var savRate=Math.max(R*0.6,0.04);
+    var earlyInt=P*savRate*(earlyD/conv);
+    earlyPay=P+(earlyInt*(1-tdsR));
+    rule='Savings rate ('+(savRate*100).toFixed(2)+'%) for '+earlyD+' days';
+  }
+  document.getElementById('fdr-erule').textContent=rule;
+  document.getElementById('fdr-epay').textContent =tk(earlyPay);
+}
+
+/* ════════════════════════════════════════
+   DPS
+════════════════════════════════════════ */
+function calcDPS(){
+  var P        = +document.getElementById('dps-p').value       ||0;
+  var R        = +document.getElementById('dps-r').value/100   ||0;
+  var T        = +document.getElementById('dps-t').value       ||0;
+  var instFreq = +document.getElementById('dps-freq').value;
+  var cmpSel   =  document.getElementById('dps-compound').value;
+  var cmpFreq  = cmpSel==='same' ? instFreq : +cmpSel;
+  var tdsR     = +document.getElementById('dps-tds').value/100;
+  var miss     = +document.getElementById('dps-miss').value    ||0;
+  var ed       = +document.getElementById('dps-ed').value      ||0;
+
+  var n = T * instFreq;
+  var r = R / cmpFreq;
+  var cmpPerInst = cmpFreq / instFreq;
+
+  /* Fix: missed installments used to only change a status message.
+     They now actually reduce the installments that contributed to
+     growth (a simplifying assumption — missed instalments are treated
+     as skipped rather than made up later). */
+  var effN = Math.max(n-miss,0);
+
+  var fv;
+  if(r===0){ fv=P*effN; }
+  else { var growth=Math.pow(1+r,cmpPerInst); fv = effN>0 ? P*growth*(Math.pow(growth,effN)-1)/(growth-1) : 0; }
+
+  var totalDep    = P*effN;
+  var interest    = fv-totalDep;              // Gross interest
+  var grossMat    = fv;                        // Maturity before Tax & ED
+  var tdsAmt      = interest*tdsR;
+  var matAfterTax = grossMat-tdsAmt;
+  var netMat      = matAfterTax-ed;            // Grand Total
+  var ear         = Math.pow(1+R/cmpFreq,cmpFreq)-1;
+
+  document.getElementById('dps-total').textContent    = tk(totalDep);
+  document.getElementById('dps-count').textContent    = (miss>0 ? effN+' paid of '+n : n)+' installments';
+  document.getElementById('dps-interest').textContent = tk(interest);
+  document.getElementById('dps-grossmat').textContent = tk(grossMat);
+  document.getElementById('dps-tds-amt').textContent  = tk(tdsAmt);
+  document.getElementById('dps-aftertax').textContent = tk(matAfterTax);
+  document.getElementById('dps-ed-amt').textContent   = tk(ed);
+  document.getElementById('dps-mat').textContent      = tk(netMat);
+  document.getElementById('dps-ear').textContent      = (ear*100).toFixed(2)+'% p.a.';
+
+  var suggestedED = exciseDutyForBalance(grossMat);
+  document.getElementById('dps-ed-note').innerHTML =
+    'Manual, one-time slab-based charge (deducted at closing) — not auto-derived from balance. '
+    +'Slab reference for '+tk(grossMat)+': <strong>'+tk(suggestedED)+'</strong> '
+    +'<a href="#" onclick="document.getElementById(\'dps-ed\').value='+suggestedED+';calcDPS();return false;" style="color:var(--accent)">Use this</a>';
+
+  document.getElementById('dps-formula').innerHTML=
+    '<strong>Installment:</strong> '+freqName(instFreq)+' · '
+    +'<strong>Compounding:</strong> '+freqName(cmpFreq)+' · '
+    +'<strong>r</strong> = '+(r*100).toFixed(4)+'% per period · '
+    +'<strong>n</strong> = '+effN+(miss>0?' (of '+n+' scheduled, '+miss+' missed)':'')+' · '
+    +'FV = PMT × (1+r)^k × [(1+r)^n−1] / [(1+r)^k−1]<br>'
+    +'Maturity after Tax = '+tk2(matAfterTax)+' · Net Maturity (Grand Total) = Maturity after Tax − ED = <strong>'+tk(netMat)+'</strong>';
+
+  var msg,mcls;
+  if(miss===0)    {msg='Good standing.';mcls='mval sm green';}
+  else if(miss<3) {msg=miss+' missed. Penalty applies.';mcls='mval sm amber';}
+  else            {msg='3+ missed — account may be closed.';mcls='mval sm red';}
+  var mel=document.getElementById('dps-miss-msg');
+  mel.textContent=msg; mel.className=mcls;
+
+  var tbody=document.getElementById('dps-tbody'); tbody.innerHTML='';
+  for(var i=1;i<=n;i++){
+    var paid=P*i;
+    var fvI;
+    if(r===0){fvI=P*i;}
+    else{var g=Math.pow(1+r,cmpPerInst); fvI=P*g*(Math.pow(g,i)-1)/(g-1);}
+    var intI=fvI-paid;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+periodLabel(instFreq,i)+'</td>'
+      +'<td class="num">'+fmt(P)+'</td>'
+      +'<td class="num">'+fmt(paid)+'</td>'
+      +'<td class="num">'+fmt(fvI)+'</td>'
+      +'<td class="num">'+fmt(intI)+'</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+/* ════════════════════════════════════════
+   MIS
+════════════════════════════════════════ */
+function calcMIS(){
+  var P       = +document.getElementById('mis-p').value      ||0;
+  var R       = +document.getElementById('mis-r').value/100  ||0;
+  var T       = +document.getElementById('mis-t').value      ||0;
+  var payFreq = +document.getElementById('mis-freq').value;
+  var tdsR    = +document.getElementById('mis-tds').value/100;
+  var ed      = +document.getElementById('mis-ed').value     ||0;
+
+  var grossPer     = P*R/payFreq;
+  var tdsPer       = grossPer*tdsR;
+  var netPer       = grossPer-tdsPer;
+  var netAnnual    = netPer*payFreq;
+  var totalPeriods = T*payFreq;
+  var totalGross   = grossPer*totalPeriods;   // total interest over full tenure
+  var totalTds     = tdsPer*totalPeriods;
+  var totalNet     = netPer*totalPeriods;     // net income already paid out period by period
+  var grossMat     = P+totalGross;            // Maturity before Tax & ED (informational, whole tenure)
+  var matAfterTax  = grossMat-totalTds;
+  /* Interest is disbursed net-of-tax each period as it's earned, so at
+     closing only the principal comes back — minus the one-time ED. */
+  var grandTotal   = P-ed;
+
+  document.getElementById('mis-gross').textContent    = tk2(grossPer);
+  document.getElementById('mis-tds-amt').textContent  = tk2(tdsPer);
+  document.getElementById('mis-net').textContent      = tk2(netPer);
+  document.getElementById('mis-annual').textContent   = tk(netAnnual);
+  document.getElementById('mis-total').textContent    = tk(totalNet);
+  document.getElementById('mis-grossmat').textContent = tk(grossMat);
+  document.getElementById('mis-aftertax').textContent = tk(matAfterTax);
+  document.getElementById('mis-ed-amt').textContent   = tk(ed);
+  document.getElementById('mis-prin').textContent     = tk(grandTotal);
+
+  var suggestedED = exciseDutyForBalance(grossMat);
+  document.getElementById('mis-ed-note').innerHTML =
+    'Manual, one-time slab-based charge (deducted at closing) — not auto-derived from balance. '
+    +'Slab reference for '+tk(grossMat)+': <strong>'+tk(suggestedED)+'</strong> '
+    +'<a href="#" onclick="document.getElementById(\'mis-ed\').value='+suggestedED+';calcMIS();return false;" style="color:var(--accent)">Use this</a>';
+
+  document.getElementById('mis-formula').innerHTML=
+    '<strong>Payout frequency:</strong> '+freqName(payFreq)+' · '
+    +'<strong>Gross per period</strong> = P × R ÷ '+payFreq+' = '+fmt(P)+' × '+(R*100).toFixed(2)+'% ÷ '+payFreq+' = <strong>'+tk2(grossPer)+'</strong><br>'
+    +'TDS ('+(tdsR*100).toFixed(0)+'%) = '+tk2(tdsPer)+' · Net per period = <strong>'+tk2(netPer)+'</strong><br>'
+    +'Maturity before Tax &amp; ED (whole tenure) = P + total interest = <strong>'+tk2(grossMat)+'</strong> · Maturity after Tax = '+tk2(matAfterTax)+'<br>'
+    +'Principal returned at maturity − ED = <strong>'+tk(grandTotal)+'</strong> (interest already paid out net-of-tax each period).';
+
+  var tbody=document.getElementById('mis-tbody'); tbody.innerHTML='';
+  var cumNet=0;
+  for(var i=1;i<=totalPeriods;i++){
+    cumNet+=netPer;
+    var isLast=(i===totalPeriods);
+    var tr=document.createElement('tr');
+    if(isLast) tr.className='payout-row';
+    tr.innerHTML='<td>'+periodLabel(payFreq,i)+(isLast?' ✦ Maturity':'')+'</td>'
+      +'<td class="num">'+fmt2(grossPer)+'</td>'
+      +'<td class="num">'+fmt2(tdsPer)+'</td>'
+      +'<td class="num">'+fmt2(netPer)+(isLast?' + Principal '+tk(P):'')+'</td>'
+      +'<td class="num">'+fmt2(cumNet)+'</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+/* ════════════════════════════════════════
+   LOAN EMI
+════════════════════════════════════════ */
+function calcEMI(){
+  var P    = +document.getElementById('emi-p').value    ||0;
+  var annR = +document.getElementById('emi-r').value/100||0;
+  var T    = +document.getElementById('emi-t').value    ||0;
+  var freq = +document.getElementById('emi-freq').value;
+  var rows =  document.getElementById('emi-rows').value;
+
+  var n   = T*freq;
+  var r   = annR/freq;
+  var emi = r>0 ? P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1) : P/n;
+  var totalPay = emi*n;
+  var totalInt = totalPay-P;
+  var ear      = Math.pow(1+r,freq)-1;
+
+  var fLabel=freqName(freq);
+  document.getElementById('emi-freq-label').textContent = fLabel+' installment';
+  document.getElementById('emi-col-emi').textContent    = fLabel+' EMI (Tk)';
+  document.getElementById('emi-col-period').textContent = 'Period ('+fLabel+')';
+  document.getElementById('emi-val').textContent        = tk(emi);
+  document.getElementById('emi-periods').textContent    = n+' ('+fLabel.toLowerCase()+')';
+  document.getElementById('emi-total').textContent      = tk(totalPay);
+  document.getElementById('emi-prin').textContent       = tk(P);
+  document.getElementById('emi-intamt').textContent     = tk(totalInt);
+  document.getElementById('emi-intpct').textContent     = ((totalInt/P)*100).toFixed(2)+'%';
+  document.getElementById('emi-mrate').textContent      = (r*100).toFixed(4)+'%';
+  document.getElementById('emi-ear').textContent        = (ear*100).toFixed(2)+'% p.a.';
+  document.getElementById('emi-formula-note').textContent=
+    'EMI = [P × r × (1+r)ⁿ] ÷ [(1+r)ⁿ−1] · '+fLabel+' · r = '+(r*100).toFixed(4)+'% per period · n = '+n+' periods · EAR = '+(ear*100).toFixed(2)+'%';
+
+  var limit = rows==='all'?n:Math.min(+rows,n);
+  var tbody=document.getElementById('emi-tbody'); tbody.innerHTML='';
+  var bal=P;
+  for(var i=1;i<=limit;i++){
+    var intPart  = bal*r;
+    var prinPart = emi-intPart;
+    var newBal   = Math.max(bal-prinPart,0);
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+periodLabel(freq,i)+'</td>'
+      +'<td class="num">'+fmt(bal)+'</td>'
+      +'<td class="num">'+fmt2(intPart)+'</td>'
+      +'<td class="num">'+fmt2(prinPart)+'</td>'
+      +'<td class="num">'+fmt2(emi)+'</td>'
+      +'<td class="num">'+fmt(newBal)+'</td>';
+    tbody.appendChild(tr);
+    bal=newBal;
+  }
+  if(limit<n){
+    var more=document.createElement('tr');
+    more.innerHTML='<td colspan="6" style="text-align:center;color:var(--text3);font-size:12px;padding:10px">… '+(n-limit)+' more periods not shown</td>';
+    tbody.appendChild(more);
+  }
+}
+
+/* ════════════════════════════════════════
+   ACCRUAL
+════════════════════════════════════════ */
+function calcAccrual(){
+  var bal   = +document.getElementById('acc-bal').value   ||0;
+  var R     = +document.getElementById('acc-r').value/100 ||0;
+  var month = +document.getElementById('acc-month').value;
+  var year  = +document.getElementById('acc-year').value  ||2025;
+  var conv  = +document.getElementById('acc-conv').value;
+  var cls   =  document.getElementById('acc-class').value;
+
+  var dim          = dimb(month,year);
+  var dailyInt     = bal*R/conv;
+  var monthlyInt   = dailyInt*dim;
+  /* Fix: quarterly/half-yearly/annual used to be a flat bal*R/4, bal*R/2,
+     bal*R — which ignored the actual number of days in those months
+     (including leap years) and contradicted the explanation text below
+     ("sum of daily accruals over that window"). Now genuinely summed. */
+  var daysQ  = daysInWindow(month,year,3);
+  var daysH  = daysInWindow(month,year,6);
+  var daysY  = daysInWindow(month,year,12);
+  var quarterlyInt = dailyInt*daysQ;
+  var halfYInt     = dailyInt*daysH;
+  var annualInt    = dailyInt*daysY;
+
+  document.getElementById('acc-daily').textContent      = tk2(dailyInt);
+  document.getElementById('acc-days').textContent       = dim+' days';
+  document.getElementById('acc-monthly').textContent    = tk2(monthlyInt);
+  document.getElementById('acc-quarterly').textContent  = tk2(quarterlyInt)+' ('+daysQ+' days)';
+  document.getElementById('acc-halfyearly').textContent = tk2(halfYInt)+' ('+daysH+' days)';
+  document.getElementById('acc-annual').textContent     = tk(annualInt)+' ('+daysY+' days)';
+
+  var dest,rule,dCls;
+  if(cls==='uc'||cls==='sma'){
+    dest='Income Account (recognized as income)'; dCls='mval sm green';
+    rule='Performing loan (UC/SMA). Accrued interest is recognized as income and posted to the Income Account each period. Daily basis means the system accrues every calendar day — quarterly/half-yearly totals are the sum of daily accruals over that window.';
+  } else if(cls==='ss'||cls==='df'){
+    dest='Interest Suspense Account (NOT income)'; dCls='mval sm amber';
+    rule='Classified loan ('+cls.toUpperCase()+'). Per BB BRPD Circular No. 15 (2024): interest is NOT recognized as income at any frequency. All accruals are parked in the Interest Suspense Account and released to income only upon actual cash recovery.';
+  } else {
+    dest='Interest charging STOPS completely (BL)'; dCls='mval sm red';
+    rule='Bad/Loss (BL). Interest charging ceases at all frequencies. No daily, monthly, quarterly, or half-yearly accrual is booked. Previously parked interest stays in Interest Suspense. Write-off procedures may be initiated.';
+  }
+  var dEl=document.getElementById('acc-dest'); dEl.textContent=dest; dEl.className=dCls;
+  document.getElementById('acc-rule-text').textContent=rule;
+
+  var tbody=document.getElementById('acc-tbody'); tbody.innerHTML='';
+  var cum=0;
+  for(var d=1;d<=dim;d++){
+    cum+=dailyInt;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>Day '+d+'</td>'
+      +'<td class="num">'+fmt(bal)+'</td>'
+      +'<td class="num">'+fmt2(dailyInt)+'</td>'
+      +'<td class="num">'+fmt2(cum)+'</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+/* ════════════════════════════════════════
+   DATE-RANGE ACCRUAL (month-end + maturity booking)
+════════════════════════════════════════ */
+function parseDateUTC(str){
+  var p=str.split('-');
+  return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
+}
+function diffDaysUTC(a,b){ return Math.round((b-a)/86400000); }
+function addDaysUTC(d,n){ return new Date(d.getTime()+n*86400000); }
+function firstOfNextMonthUTC(d){ return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 1)); }
+function fmtDateUTC(d){
+  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getUTCDate()+' '+mo[d.getUTCMonth()]+' '+d.getUTCFullYear();
+}
+function monthNameUTC(d){
+  var mo=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return mo[d.getUTCMonth()]+' '+d.getUTCFullYear();
+}
+
+function toggleOverdueMode(){
+  var mode = document.getElementById('acc2-overdue-mode').value;
+  document.getElementById('acc2-overdue-wrap').style.display      = mode==='days'  ?'grid':'none';
+  document.getElementById('acc2-overduecount-wrap').style.display = mode==='count'?'grid':'none';
+}
+
+/* Converts "N installments missed" into an effective missed-since date,
+   by counting back N occurrences of the recurring Due Date (same
+   day-of-month, clamped for short months) from the assessment date. */
+function clampedDueOccurrence(dueDay, year, month0){
+  var lastDay = dimb(month0+1, year);
+  return new Date(Date.UTC(year, month0, Math.min(dueDay,lastDay)));
+}
+function latestDueOnOrBefore(due, targetDate){
+  var dueDay=due.getUTCDate(); var y=due.getUTCFullYear(), m=due.getUTCMonth();
+  var occ=clampedDueOccurrence(dueDay,y,m);
+  while(true){
+    var ny=y, nm=m+1; if(nm>11){nm=0;ny+=1;}
+    var nextOcc=clampedDueOccurrence(dueDay,ny,nm);
+    if(nextOcc>targetDate) break;
+    y=ny; m=nm; occ=nextOcc;
+  }
+  return occ;
+}
+function nthMissedDate(due, targetDate, count){
+  var dueDay=due.getUTCDate();
+  var latest=latestDueOnOrBefore(due,targetDate);
+  var y=latest.getUTCFullYear(), m=latest.getUTCMonth();
+  for(var i=1;i<count;i++){ m-=1; if(m<0){m=11;y-=1;} latest=clampedDueOccurrence(dueDay,y,m); }
+  return latest;
+}
+
+function toggleAccrual2Purpose(){
+  var purpose = document.getElementById('acc2-purpose').value;
+  var isLoan = purpose==='loan';
+  document.getElementById('acc2-duedate-wrap').style.display = isLoan?'flex':'none';
+  document.getElementById('acc2-loan-note').style.display    = isLoan?'block':'none';
+  document.getElementById('acc2-overdue-mode-wrap').style.display = isLoan?'flex':'none';
+  document.getElementById('acc2-overdue-note').style.display = isLoan?'block':'none';
+  document.getElementById('acc2-loan-summary').style.display = isLoan?'grid':'none';
+  if(isLoan) toggleOverdueMode(); else {
+    document.getElementById('acc2-overdue-wrap').style.display='none';
+    document.getElementById('acc2-overduecount-wrap').style.display='none';
+  }
+  var headRow = document.getElementById('acc2-thead-row');
+  headRow.innerHTML = isLoan
+    ? '<th>Month</th><th>From</th><th>To</th><th class="num">Days</th><th class="num">Days Overdue</th><th class="num">Interest (Tk)</th>'
+      +'<th class="num">Recognized (Tk)</th><th class="num">Suspense (Tk)</th><th class="num">Cumulative Income (Tk)</th><th>Classification</th><th>Booking</th><th>Provision Date</th>'
+    : '<th>Month</th><th>From</th><th>To</th><th class="num">Days</th><th class="num">Interest (Tk)</th><th class="num">Cumulative (Tk)</th><th>Booking</th>';
+}
+
+/* Overdue-months calculation (calendar-based). Classification itself now
+   comes from the editable Classification Policy card (Classification tab)
+   via getClassificationPolicy()/classifyByPolicy() below — nothing here
+   is hardcoded, so this tab and the Loan Accrual tab always agree. */
+/* Overdue-months calculation. FIXED: previously used calendar-month
+   alignment (same day-of-month next month = 1 month overdue), which was
+   wrong whenever the Due Date fell late in a month (29th-31st) — e.g. a
+   loan due 29-Jan was still shown as "0 months overdue / UC" at
+   28-Feb, despite being 30 actual days overdue, because February has
+   no 29th to align against. Now uses actual elapsed days ÷ 30, which
+   doesn't depend on which day-of-month the due date falls on. */
+function overdueMonthsBetween(dueDate, assessDate){
+  var days = diffDaysUTC(dueDate, assessDate);
+  if(days<=0) return 0;
+  return Math.floor(days/30);
+}
+
+function getClassificationPolicy(){
+  return {
+    smaCutoff: +document.getElementById('clp-sma').value ||3,
+    ssCutoff:  +document.getElementById('clp-ss').value  ||12,
+    dfCutoff:  +document.getElementById('clp-df').value  ||36,
+    prov: {
+      UC:  +document.getElementById('clp-prov-uc').value  ||0,
+      SMA: +document.getElementById('clp-prov-sma').value ||0,
+      SS:  +document.getElementById('clp-prov-ss').value  ||0,
+      DF:  +document.getElementById('clp-prov-df').value  ||0,
+      BL:  +document.getElementById('clp-prov-bl').value  ||0
+    },
+    treat: {
+      UC:  document.getElementById('clp-treat-uc').value,
+      SMA: document.getElementById('clp-treat-sma').value,
+      SS:  document.getElementById('clp-treat-ss').value,
+      DF:  document.getElementById('clp-treat-df').value,
+      BL:  document.getElementById('clp-treat-bl').value
+    }
+  };
+}
+
+function classifyByPolicy(months, policy){
+  var code, name, badge;
+  if(months===0)                    { code='UC';  name='Unclassified';     badge='succ'; }
+  else if(months<=policy.smaCutoff) { code='SMA'; name='Special Mention';  badge='info'; }
+  else if(months<=policy.ssCutoff)  { code='SS';  name='Sub-Standard';     badge='warn'; }
+  else if(months<=policy.dfCutoff)  { code='DF';  name='Doubtful';         badge='warn'; }
+  else                               { code='BL';  name='Bad/Loss';         badge='dang'; }
+  var treatment = policy.treat[code];
+  var treatLabel = treatment==='income' ? 'Income Account'
+                  : treatment==='suspense' ? 'Interest Suspense Account'
+                  : 'Accrual Stopped';
+  return {code:code, name:name, badge:badge, provPct:policy.prov[code], treatment:treatment, treatLabel:treatLabel};
+}
+
+function onPolicyChange(){
+  try{ calcClassify(); }catch(e){}
+  try{ calcAccrualDates(); }catch(e){}
+}
+function classifyLoan(months){
+  return classifyByPolicy(months, getClassificationPolicy());
+}
+
+/* Builds the merged list of booking events for LOAN accrual: every
+   calendar month-end AND every recurring due-date occurrence (same
+   day-of-month as the given Due Date, clamped for short months like
+   February), deduplicated when they land on the same day, plus the
+   final End Date itself (maturity/closing). This mirrors how the
+   system actually posts two separate entries — one at month-end
+   close, one at the due date — instead of merging them into one row. */
+function buildLoanBoundaries(start, end, due){
+  var dueDay = due.getUTCDate();
+  var map = {};
+  function addBoundary(date, isMonthEnd, isDue){
+    var key = date.getTime();
+    if(!map[key]) map[key] = {date:date, isMonthEnd:false, isDue:false, isMaturity:false};
+    if(isMonthEnd) map[key].isMonthEnd = true;
+    if(isDue) map[key].isDue = true;
+  }
+  var cur = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+  while(cur < end){
+    var monthEndDate = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth()+1, 0));
+    if(monthEndDate >= start && monthEndDate < end) addBoundary(monthEndDate, true, false);
+    cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth()+1, 1));
+  }
+  var dcur = new Date(due.getTime());
+  while(dcur < end){
+    if(dcur >= start) addBoundary(dcur, false, true);
+    var ny=dcur.getUTCFullYear(), nm=dcur.getUTCMonth()+1;
+    if(nm>11){ nm=0; ny+=1; }
+    var lastDayNext = dimb(nm+1, ny);
+    dcur = new Date(Date.UTC(ny, nm, Math.min(dueDay,lastDayNext)));
+  }
+  var lastDay = addDaysUTC(end,-1);
+  addBoundary(lastDay, map[lastDay.getTime()]?map[lastDay.getTime()].isMonthEnd:false, map[lastDay.getTime()]?map[lastDay.getTime()].isDue:false);
+  map[lastDay.getTime()].isMaturity = true;
+  var list = Object.keys(map).map(function(k){return map[k];}).filter(function(b){ return b.date>=start && b.date<=lastDay; });
+  list.sort(function(a,b){ return a.date-b.date; });
+  return list;
+}
+
+function calcAccrualDates(){
+  var startStr = document.getElementById('acc2-start').value;
+  var endStr   = document.getElementById('acc2-end').value;
+  var bal      = +document.getElementById('acc2-bal').value ||0;
+  var R        = +document.getElementById('acc2-r').value/100 ||0;
+  var conv     = +document.getElementById('acc2-conv').value;
+  var purpose  = document.getElementById('acc2-purpose').value;
+  var isLoan   = purpose==='loan';
+  var dueStr   = document.getElementById('acc2-duedate').value;
+
+  var tbody=document.getElementById('acc2-tbody'); tbody.innerHTML='';
+  var totalDaysEl=document.getElementById('acc2-totaldays');
+  var dailyEl=document.getElementById('acc2-daily');
+  var daysEl=document.getElementById('acc2-days');
+  var monthsEl=document.getElementById('acc2-months');
+  var totalEl=document.getElementById('acc2-total');
+  var fEl=document.getElementById('acc2-formula');
+  var statusEl=document.getElementById('acc2-status');
+  var overdueEl=document.getElementById('acc2-overdue');
+  var recognizedEl=document.getElementById('acc2-recognized');
+  var suspenseEl=document.getElementById('acc2-suspense');
+
+  /* Resets every summary field to "—". Used on every early-return path
+     below so a previous valid calculation never lingers on screen once
+     the inputs become incomplete/invalid (e.g. clearing a date). */
+  function resetAccrual2Display(){
+    totalDaysEl.textContent='—'; dailyEl.textContent='—'; daysEl.textContent='—';
+    monthsEl.textContent='—'; totalEl.textContent='—'; fEl.innerHTML='';
+    statusEl.textContent='—'; overdueEl.textContent='—';
+    recognizedEl.textContent='—'; suspenseEl.textContent='—';
+  }
+
+  if(!startStr || !endStr){
+    resetAccrual2Display();
+    return;
+  }
+
+  var start=parseDateUTC(startStr), end=parseDateUTC(endStr);
+
+  if(end<=start){
+    resetAccrual2Display();
+    totalDaysEl.textContent='End date must be after start date';
+    return;
+  }
+
+  if(isLoan && !dueStr){
+    resetAccrual2Display();
+    totalDaysEl.textContent = diffDaysUTC(start,end)+' days';
+    fEl.innerHTML='<strong>Enter the Loan Due Date above</strong> to calculate month-wise classification and interest treatment.';
+    return;
+  }
+  var due = isLoan ? parseDateUTC(dueStr) : null;
+  var overdueMode = isLoan ? document.getElementById('acc2-overdue-mode').value : 'days';
+  var overdueDaysInput=0, hasOverdue=false, effectiveMissedDate=null;
+  var lastActualDay = isLoan ? addDaysUTC(end,-1) : null;
+
+  /* The Due Date only marks the recurring installment schedule (for the
+     Month-End/Due-Date booking rows). Whether the loan is ACTUALLY
+     overdue is a separate fact only the user knows — so classification
+     is driven by an explicit overdue input, not by assuming the loan
+     has been unpaid ever since the Due Date. Two ways to specify it:
+     - Days overdue directly, or
+     - Number of missed installments, converted to a date by counting
+       back that many recurring Due Date occurrences. */
+  if(isLoan && overdueMode==='count'){
+    var overdueCount = +document.getElementById('acc2-overduecount').value||0;
+    hasOverdue = overdueCount>0;
+    if(hasOverdue){
+      effectiveMissedDate = nthMissedDate(due, lastActualDay, overdueCount);
+      overdueDaysInput = diffDaysUTC(effectiveMissedDate, lastActualDay);
+    }
+    var effDateCountEl = document.getElementById('acc2-effdate-count');
+    effDateCountEl.textContent = hasOverdue ? (fmtDateUTC(effectiveMissedDate)+' ('+overdueDaysInput+' days)') : 'N/A — not overdue';
+  } else if(isLoan){
+    overdueDaysInput = +document.getElementById('acc2-overduedays').value||0;
+    hasOverdue = overdueDaysInput > 0;
+    effectiveMissedDate = hasOverdue ? addDaysUTC(lastActualDay, -overdueDaysInput) : null;
+    var effDateEl = document.getElementById('acc2-effdate');
+    effDateEl.textContent = hasOverdue ? fmtDateUTC(effectiveMissedDate) : 'N/A — not overdue';
+  }
+
+  var totalDays = diffDaysUTC(start,end);
+  totalDaysEl.textContent = totalDays+' days';
+  daysEl.textContent      = totalDays+' days';
+
+  var dailyInt = bal*R/conv;
+  dailyEl.textContent = tk2(dailyInt);
+
+  /* DEPOSIT: split purely by calendar month-end (unchanged from before).
+     LOAN: split by BOTH month-end AND the recurring due-date, since the
+     system posts two separate entries — this is what drives the new
+     Booking / Provision Date columns below. */
+  var buckets=[];
+  if(!isLoan){
+    var cur=start;
+    while(cur<end){
+      var nextMonth=firstOfNextMonthUTC(cur);
+      var segEnd = nextMonth<end ? nextMonth : end;
+      var days = diffDaysUTC(cur,segEnd);
+      var lastDay = addDaysUTC(segEnd,-1);
+      var isMaturity = (segEnd.getTime()===end.getTime());
+      var isMonthEnd = (lastDay.getUTCDate()===dimb(lastDay.getUTCMonth()+1, lastDay.getUTCFullYear()));
+      buckets.push({monthLabel:monthNameUTC(cur), from:cur, to:lastDay, days:days, isMaturity:isMaturity, isMonthEnd:isMonthEnd});
+      cur=segEnd;
+    }
+  } else {
+    var boundaries = buildLoanBoundaries(start, end, due);
+    var segStart = start;
+    boundaries.forEach(function(bd){
+      var days = diffDaysUTC(segStart, addDaysUTC(bd.date,1));
+      buckets.push({monthLabel:monthNameUTC(bd.date), from:segStart, to:bd.date, days:days,
+        isMaturity:bd.isMaturity, isMonthEnd:bd.isMonthEnd, isDue:bd.isDue});
+      segStart = addDaysUTC(bd.date,1);
+    });
+  }
+
+  document.getElementById('acc2-months-label').textContent = isLoan ? 'Booking rows (month-end + due-date)' : 'Months touched';
+  monthsEl.textContent = isLoan
+    ? buckets.length+' entr'+(buckets.length===1?'y':'ies')
+    : buckets.length+' month'+(buckets.length===1?'':'s');
+
+  var cum=0, cumIncome=0, totalGross=0, totalRecognized=0, totalSuspense=0, lastCls=null;
+  buckets.forEach(function(b){
+    var accrual = dailyInt*b.days;
+    totalGross+=accrual;
+
+    if(!isLoan){
+      cum+=accrual;
+      var booking = b.isMaturity ? 'At maturity/closing' : (b.isMonthEnd?'Month-end':'—');
+      var tr=document.createElement('tr');
+      if(b.isMaturity) tr.className='payout-row';
+      tr.innerHTML='<td>'+b.monthLabel+'</td>'
+        +'<td>'+fmtDateUTC(b.from)+'</td>'
+        +'<td>'+fmtDateUTC(b.to)+'</td>'
+        +'<td class="num">'+b.days+'</td>'
+        +'<td class="num">'+fmt2(accrual)+'</td>'
+        +'<td class="num">'+fmt2(cum)+'</td>'
+        +'<td>'+booking+'</td>';
+      tbody.appendChild(tr);
+    } else {
+      var daysOverdue = hasOverdue ? Math.max(diffDaysUTC(effectiveMissedDate,b.to),0) : 0;
+      var months = hasOverdue ? overdueMonthsBetween(effectiveMissedDate,b.to) : 0;
+      var cls = classifyLoan(months);
+      lastCls = cls;
+      var recognized=0, suspense=0;
+      if(cls.treatment==='income'){ recognized=accrual; }
+      else if(cls.treatment==='suspense'){ suspense=accrual; }
+      /* 'stopped' (BL): neither recognized nor suspended — charging has stopped entirely. */
+      cumIncome+=recognized; totalRecognized+=recognized; totalSuspense+=suspense;
+
+      var bookingLabel = b.isMaturity ? 'At Maturity/Closing'
+        : (b.isMonthEnd && b.isDue) ? 'Month-End + Due Date'
+        : b.isMonthEnd ? 'Month-End'
+        : 'Due Date';
+      /* Provisioning is only booked at month-end financial close (or at
+         final closing) — a pure due-date posting doesn't carry a
+         provision entry; it waits for the next month-end. */
+      var provisionDate = (b.isMonthEnd || b.isMaturity) ? fmtDateUTC(b.to) : '—';
+
+      var tr=document.createElement('tr');
+      if(b.isMaturity) tr.className='payout-row';
+      var clsLabel = cls.code+' — '+cls.treatLabel;
+      tr.innerHTML='<td>'+b.monthLabel+'</td>'
+        +'<td>'+fmtDateUTC(b.from)+'</td>'
+        +'<td>'+fmtDateUTC(b.to)+'</td>'
+        +'<td class="num">'+b.days+'</td>'
+        +'<td class="num">'+daysOverdue+'</td>'
+        +'<td class="num">'+fmt2(accrual)+'</td>'
+        +'<td class="num">'+fmt2(recognized)+'</td>'
+        +'<td class="num">'+fmt2(suspense)+'</td>'
+        +'<td class="num">'+fmt2(cumIncome)+'</td>'
+        +'<td>'+clsLabel+'</td>'
+        +'<td>'+bookingLabel+'</td>'
+        +'<td>'+provisionDate+'</td>';
+      tbody.appendChild(tr);
+    }
+  });
+
+  if(!isLoan){
+    totalEl.textContent = tk2(totalGross);
+    fEl.innerHTML =
+      '<strong>Daily interest</strong> = Balance × Rate ÷ '+conv+' = '+fmt(bal)+' × '+(R*100).toFixed(2)+'% ÷ '+conv+' = <strong>'+tk2(dailyInt)+'</strong><br>'
+      +'Period: '+fmtDateUTC(start)+' → '+fmtDateUTC(end)+' = <strong>'+totalDays+' days</strong> across '+buckets.length+' month'+(buckets.length===1?'':'s')+'<br>'
+      +'Each month\'s accrual = Daily interest × days actually held that month · Total accrual = <strong>'+tk2(totalGross)+'</strong>';
+  } else {
+    totalEl.textContent = tk2(totalGross);
+    var overdueAtEnd = hasOverdue ? overdueMonthsBetween(effectiveMissedDate, addDaysUTC(end,-1)) : 0;
+    var clsAtEnd = classifyLoan(overdueAtEnd);
+    statusEl.textContent = clsAtEnd.code+' — '+clsAtEnd.name;
+    overdueEl.textContent = hasOverdue ? (overdueDaysInput+' day'+(overdueDaysInput===1?'':'s')+' ('+overdueAtEnd+' month'+(overdueAtEnd===1?'':'s')+') overdue') : 'Not overdue — fully current';
+    recognizedEl.textContent = tk2(totalRecognized);
+    suspenseEl.textContent = tk2(totalSuspense);
+    fEl.innerHTML =
+      '<strong>Daily interest</strong> = Balance × Rate ÷ '+conv+' = '+fmt(bal)+' × '+(R*100).toFixed(2)+'% ÷ '+conv+' = <strong>'+tk2(dailyInt)+'</strong><br>'
+      +'Due Date: '+fmtDateUTC(due)+' (recurs monthly, for booking rows only) · '
+      +(hasOverdue ? 'Overdue '+overdueDaysInput+' days as of End Date → treated as unpaid since '+fmtDateUTC(effectiveMissedDate)+'.'
+                   : '<strong>Not overdue</strong> — recognized as Income throughout, regardless of Due Date.')
+      +' Classification thresholds are editable in the Classification tab.<br>'
+      +'Total interest (gross) = <strong>'+tk2(totalGross)+'</strong> · Recognized as Income = <strong>'+tk2(totalRecognized)+'</strong> · Interest Suspense = <strong>'+tk2(totalSuspense)+'</strong>'
+      +(clsAtEnd.treatment==='stopped'?'<br><span style="color:var(--red)">Loan is Bad/Loss at End Date — interest charging has stopped; no further accrual is booked from that point.</span>':'');
+  }
+}
+function calcClassify(){
+  var months = +document.getElementById('cl-months').value||0;
+  var bal    = +document.getElementById('cl-bal').value   ||0;
+  var resch  = +document.getElementById('cl-resch').value;
+  var typeSel= document.getElementById('cl-type').value;
+  var typeName = typeSel==='cont'?'Continuous Loan':typeSel==='demand'?'Demand Loan':'Fixed Term Loan';
+
+  var policy = getClassificationPolicy();
+  var c = classifyByPolicy(months, policy);
+  var provAmt = bal*c.provPct/100;
+
+  document.getElementById('cl-label').textContent    = c.code+' — '+c.name+' ('+typeName+')';
+  document.getElementById('cl-badge-wrap').innerHTML = '<span class="badge '+c.badge+'">'+c.code+' — '+c.name+'</span> <span class="badge info">'+typeName+'</span>';
+  document.getElementById('cl-prov-pct').textContent = c.provPct+'%';
+  document.getElementById('cl-prov-amt').textContent = tk(provAmt);
+  document.getElementById('cl-int-treat').textContent= '→ '+c.treatLabel;
+
+  var rbox=document.getElementById('cl-resch-box');
+  if(c.code==='UC'||c.code==='SMA'){
+    rbox.innerHTML='<div class="note">Regular and SMA loans cannot be rescheduled under BB rules.</div>';
+  } else if(resch>0){
+    var tbl={'SS':[48,36,24],'DF':[36,24,18],'BL':[36,24,18]};
+    var arr=tbl[c.code]||[48,36,24];
+    var allowed=resch<=3?arr[resch-1]:0;
+    var sfx=resch===1?'st':resch===2?'nd':'rd';
+    var html='<div class="mcard mt"><div class="mlabel">Max tenure — '+resch+sfx+' rescheduling</div>'
+      +'<div class="mval sm '+(allowed>0?'amber':'red')+'">'+(allowed>0?allowed+' months max':'No further rescheduling — limit reached')+'</div></div>';
+    if(allowed>0) html+='<div class="note" style="margin-top:8px">Missing 6 months or 2 quarterly installments post-rescheduling → immediate downgrade to Bad/Loss.</div>';
+    rbox.innerHTML=html;
+  } else { rbox.innerHTML=''; }
+}
+
+/* Boot — intentionally NOT calling calc*() here.
+   Inputs are blank on load (placeholders only), so results stay as
+   the static "—" placeholders until the user enters their own numbers. */
+</script>
+</body>
+</html>
