@@ -40,8 +40,8 @@ Default values and classification thresholds are aligned to:
 No installation required.
 
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
+git clone https://github.com/KaushikDebdas/BD-Financial-Calculator.git
+cd BD-Financial-Calculator.git
 open index.html   # or just double-click the file
 ```
 
@@ -52,7 +52,7 @@ Or use GitHub Pages to host it live — see [Deployment](#-deployment) below.
 1. Push this repo to GitHub.
 2. Go to **Settings → Pages**.
 3. Set **Source** to `main` branch, `/ (root)` folder.
-4. Your calculator will be live at `https://<your-username>.github.io/<repo-name>/`.
+4. Your calculator will be live at `https://kaushikdebdas.github.io/BD-Financial-Calculator/`.
 
 ## 🛠️ Tech stack
 
